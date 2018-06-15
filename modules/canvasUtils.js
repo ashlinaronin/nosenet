@@ -37,7 +37,8 @@ export function drawTriangle(ctx, y, x, r, color) {
   const trianglePoints = [
     [x, y - (r/2)],
     [x - r, y + (r/2)],
-    [x + r,y + (r/2)]
+    [x + r,y + (r/2)],
+    [x, y] // center point, just used for collision detection
   ];
 
   const anyPointInStroke = trianglePoints.some(point => ctx.isPointInStroke(point[0], point[1]));
