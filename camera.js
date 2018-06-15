@@ -17,7 +17,8 @@
 import * as posenet from '@tensorflow-models/posenet';
 import Stats from 'stats.js';
 import {createDefaultGuiState, setupGui} from './modules/gui';
-import {drawKeypoints, drawSkeleton} from './modules/canvasUtils';
+import {drawKeypoints, drawMirroredVideo, drawSkeleton} from './modules/canvasUtils';
+import {drawMaze} from './modules/maze';
 import {isMobile} from './modules/deviceDetection';
 
 const videoWidth = 600;
@@ -133,12 +134,10 @@ function detectPoseInRealTime(video, net) {
     ctx.clearRect(0, 0, videoWidth, videoHeight);
 
     if (guiState.output.showVideo) {
-      ctx.save();
-      ctx.scale(-1, 1);
-      ctx.translate(-videoWidth, 0);
-      ctx.drawImage(video, 0, 0, videoWidth, videoHeight);
-      ctx.restore();
+      drawMirroredVideo(ctx, videoWidth, videoHeight);
     }
+
+    drawMaze(ctx, videoWidth, videoHeight, 'yellow');
 
     // For each pose (i.e. person) detected in an image, loop through the poses
     // and draw the resulting skeleton and keypoints if over certain confidence

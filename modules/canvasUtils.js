@@ -24,12 +24,31 @@ function toTuple({y, x}) {
   return [y, x];
 }
 
+export function drawMirroredVideo(ctx, videoWidth, videoHeight) {
+  ctx.save();
+  ctx.scale(-1, 1);
+  ctx.translate(-videoWidth, 0);
+  ctx.drawImage(video, 0, 0, videoWidth, videoHeight);
+  ctx.restore();
+}
+
 export function drawTriangle(ctx, y, x, r, color) {
+  const trianglePoints = [
+    [x, y - (r/2)],
+    [x - r, y + (r/2)],
+    [x + r,y + (r/2)]
+  ];
+
+  const anyPointInStroke = trianglePoints.some(point => ctx.isPointInStroke(point[0], point[1]));
+
+  ctx.fillStyle = anyPointInStroke ? 'blue' : color;
+
   ctx.beginPath();
-  ctx.moveTo(x, y);
-  ctx.lineTo(x - r, y + r);
-  ctx.lineTo(x + r, y + r);
-  ctx.fillStyle = color;
+
+  ctx.moveTo(trianglePoints[0][0], trianglePoints[0][1]);
+  ctx.lineTo(trianglePoints[1][0], trianglePoints[1][1]);
+  ctx.lineTo(trianglePoints[2][0], trianglePoints[2][1]);
+
   ctx.fill();
 }
 
