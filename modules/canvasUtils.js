@@ -16,6 +16,7 @@
  */
 import * as tf from '@tensorflow/tfjs';
 import * as posenet from '@tensorflow-models/posenet';
+import {playNote} from './sound';
 
 const color = 'yellow';
 const lineWidth = 2;
@@ -40,6 +41,10 @@ export function drawTriangle(ctx, y, x, r, color) {
   ];
 
   const anyPointInStroke = trianglePoints.some(point => ctx.isPointInStroke(point[0], point[1]));
+
+  if (anyPointInStroke) {
+    playNote();
+  }
 
   ctx.fillStyle = anyPointInStroke ? 'blue' : color;
 
