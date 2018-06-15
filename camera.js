@@ -17,12 +17,13 @@
 import * as posenet from '@tensorflow-models/posenet';
 import Stats from 'stats.js';
 import {createDefaultGuiState, setupGui} from './modules/gui';
-import {drawKeypoints, drawSkeleton} from './demo_util';
+import {drawKeypoints, drawSkeleton} from './modules/canvasUtils';
 import {isMobile} from './modules/deviceDetection';
 
 const videoWidth = 600;
 const videoHeight = 500;
 const stats = new Stats();
+const guiState = createDefaultGuiState();
 
 /**
  * Loads a the camera to be used in the demo
@@ -63,7 +64,6 @@ async function loadVideo() {
   return video;
 }
 
-const guiState = createDefaultGuiState();
 
 /**
  * Sets up a frames per second panel on the top-left of the window

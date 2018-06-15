@@ -19,27 +19,12 @@ import * as posenet from '@tensorflow-models/posenet';
 
 const color = 'yellow';
 const lineWidth = 2;
-const img = new Image();
-img.src = './camera.gif';
 
 function toTuple({y, x}) {
   return [y, x];
 }
 
-export function drawPoint(ctx, y, x, r, color) {
-  ctx.beginPath();
-
-
-  ctx.arc(x, y, r, 0, 2 * Math.PI);
-  ctx.fillStyle = color;
-
-
-
-  ctx.fill();
-}
-
 export function drawTriangle(ctx, y, x, r, color) {
-
   ctx.beginPath();
   ctx.moveTo(x, y);
   ctx.lineTo(x - r, y + r);
