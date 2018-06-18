@@ -5,7 +5,7 @@ export function createDefaultGuiState() {
   return {
     algorithm: 'single-pose',
     input: {
-      mobileNetArchitecture: isMobile() ? '0.50' : '0.75',
+      mobileNetArchitecture: '0.50',
       outputStride: 16,
       imageScaleFactor: 0.5,
     },
