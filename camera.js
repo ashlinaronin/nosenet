@@ -18,7 +18,7 @@ import * as posenet from '@tensorflow-models/posenet';
 import Stats from 'stats.js';
 import {createDefaultGuiState, setupGui} from './modules/gui';
 import {drawKeypoints, drawMirroredVideo, drawSkeleton} from './modules/canvasUtils';
-import {drawPixelMaze, generatePixelMap} from './modules/maze';
+import {drawPixelMaze, generatePixelMap} from './modules/map';
 import {isMobile} from './modules/deviceDetection';
 
 const videoWidth = 600;

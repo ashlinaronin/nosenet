@@ -1,5 +1,4 @@
 import dat from 'dat.gui';
-import {isMobile} from './deviceDetection';
 
 export function createDefaultGuiState() {
   return {
