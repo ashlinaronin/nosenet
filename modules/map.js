@@ -61,15 +61,57 @@ function generateTrianglePoints(x, y, r) {
 }
 
 function checkForInMap(trianglePoints, map, videoWidth, videoHeight) {
-  return trianglePoints.some(point => isPointInMap(point[0], point[1], map, videoWidth, videoHeight));
+  let anyTrianglePointInMap = false;
+
+  trianglePoints.forEach(trianglePoint => {
+    const [pointX, pointY] = trianglePoint;
+
+    const mapCoordinates = getMapCoordinatesForPoint(pointX, pointY, map, videoWidth, videoHeight);
+    const containsPoint = mapContainsPoint(map, mapCoordinates);
+
+    if (containsPoint) {
+      anyTrianglePointInMap = true;
+      removePointFromMap(map, mapCoordinates);
+    }
+  });
+
+  return anyTrianglePointInMap;
 }
 
-function isPointInMap(x, y, map, videoWidth, videoHeight) {
+function removePointFromMap(map, mapPointCoords) {
+  const [mapXCoord, mapYCoord] = mapPointCoords;
+  map[mapXCoord][mapYCoord] = false;
+}
+
+function getMapCoordinatesForPoint(x, y, map, videoWidth, videoHeight) {
   const widthUnit = videoWidth / map.length; // # rows
   const heightUnit = videoHeight / map[0].length; // # cols
 
-  const mapXCoord = Math.floor(x / widthUnit);
-  const mapYCoord = Math.floor(y / heightUnit);
+  let mapXCoord = Math.floor(x / widthUnit);
+  let mapYCoord = Math.floor(y / heightUnit);
+
+  // Account for edges of camera window
+  if (mapXCoord >= map.length) {
+    mapXCoord = map.length - 1;
+  }
+
+  if (mapYCoord >= map[0].length) {
+    mapYCoord = map[0].length - 1;
+  }
+
+  if (mapXCoord <= 0) {
+    mapXCoord = 0;
+  }
+
+  if (mapYCoord <= 0) {
+    mapYCoord = 0;
+  }
+
+  return [mapXCoord, mapYCoord];
+}
+
+function mapContainsPoint(map, mapPointCoords) {
+  const [mapXCoord, mapYCoord] = mapPointCoords;
   return map[mapXCoord][mapYCoord] === true;
 }
 
