@@ -18,13 +18,14 @@ import * as posenet from '@tensorflow-models/posenet';
 import Stats from 'stats.js';
 import {createDefaultGuiState, setupGui} from './modules/gui';
 import {drawKeypoints, drawMirroredVideo, drawSkeleton} from './modules/canvasUtils';
-import {drawMaze} from './modules/maze';
+import {drawPixelMaze, generatePixelMap} from './modules/maze';
 import {isMobile} from './modules/deviceDetection';
 
 const videoWidth = 600;
 const videoHeight = 500;
 const stats = new Stats();
 const guiState = createDefaultGuiState();
+const map = generatePixelMap();
 
 /**
  * Loads a the camera to be used in the demo
@@ -88,17 +89,6 @@ function detectPoseInRealTime(video, net) {
   canvas.height = videoHeight;
 
   async function poseDetectionFrame() {
-    if (guiState.changeToArchitecture) {
-      // Important to purge variables and free up GPU memory
-      guiState.net.dispose();
-
-      // Load the PoseNet model weights for either the 0.50, 0.75, 1.00, or 1.01
-      // version
-      guiState.net = await posenet.load(+guiState.changeToArchitecture);
-
-      guiState.changeToArchitecture = null;
-    }
-
     // Begin monitoring code for frames per second
     stats.begin();
 
@@ -137,7 +127,7 @@ function detectPoseInRealTime(video, net) {
       drawMirroredVideo(ctx, videoWidth, videoHeight);
     }
 
-    drawMaze(ctx, videoWidth, videoHeight, 'yellow');
+    drawPixelMaze(ctx, videoWidth, videoHeight, 'orange', map);
 
     // For each pose (i.e. person) detected in an image, loop through the poses
     // and draw the resulting skeleton and keypoints if over certain confidence
@@ -145,7 +135,7 @@ function detectPoseInRealTime(video, net) {
     poses.forEach(({score, keypoints}) => {
       if (score >= minPoseConfidence) {
         if (guiState.output.showPoints) {
-          drawKeypoints(keypoints, minPartConfidence, ctx);
+          drawKeypoints(keypoints, minPartConfidence, ctx, 1, map);
         }
         if (guiState.output.showSkeleton) {
           drawSkeleton(keypoints, minPartConfidence, ctx);

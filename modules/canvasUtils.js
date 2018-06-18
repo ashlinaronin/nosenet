@@ -33,7 +33,7 @@ export function drawMirroredVideo(ctx, videoWidth, videoHeight) {
   ctx.restore();
 }
 
-export function drawTriangle(ctx, y, x, r, color) {
+export function drawTriangle(ctx, y, x, r, color, map) {
   const trianglePoints = [
     [x, y - (r/2)],
     [x - r, y + (r/2)],
@@ -41,13 +41,13 @@ export function drawTriangle(ctx, y, x, r, color) {
     [x, y] // center point, just used for collision detection
   ];
 
-  const anyPointInStroke = trianglePoints.some(point => ctx.isPointInStroke(point[0], point[1]));
+  const anyPointInMap = trianglePoints.some(point => isPointInMap(point[0], point[1], map));
 
   if (anyPointInStroke) {
     playNote();
   }
 
-  ctx.fillStyle = anyPointInStroke ? 'blue' : color;
+  ctx.fillStyle = anyPointInMap ? 'blue' : color;
 
   ctx.beginPath();
 
@@ -56,6 +56,16 @@ export function drawTriangle(ctx, y, x, r, color) {
   ctx.lineTo(trianglePoints[2][0], trianglePoints[2][1]);
 
   ctx.fill();
+}
+
+function isPointInMap(x, y, map) {
+  const resolution = 3;
+  const widthUnit = 640/resolution;
+  const heightUnit = 480/resolution;
+
+  const multX = Math.floor(x / widthUnit);
+  const multY = Math.floor(y / heightUnit);
+  return map[multX][multY] === 1;
 }
 
 /**
@@ -86,7 +96,7 @@ export function drawSkeleton(keypoints, minConfidence, ctx, scale = 1) {
 /**
  * Draw pose keypoints onto a canvas
  */
-export function drawKeypoints(keypoints, minConfidence, ctx, scale = 1) {
+export function drawKeypoints(keypoints, minConfidence, ctx, scale = 1, map) {
   for (let i = 0; i < keypoints.length; i++) {
     const keypoint = keypoints[i];
 
@@ -97,7 +107,7 @@ export function drawKeypoints(keypoints, minConfidence, ctx, scale = 1) {
     const {y, x} = keypoint.position;
 
     if (keypoint.part === 'nose') {
-      drawTriangle(ctx, y * scale, x * scale, 20, color);
+      drawTriangle(ctx, y * scale, x * scale, 20, color, map);
     }
 
   }
