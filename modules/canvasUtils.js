@@ -33,7 +33,7 @@ export function drawMirroredVideo(ctx, videoWidth, videoHeight) {
   ctx.restore();
 }
 
-export function drawTriangle(ctx, y, x, r, color, map) {
+export function drawTriangle(ctx, y, x, r, color, map, videoWidth, videoHeight) {
   const trianglePoints = [
     [x, y - (r/2)],
     [x - r, y + (r/2)],
@@ -41,9 +41,9 @@ export function drawTriangle(ctx, y, x, r, color, map) {
     [x, y] // center point, just used for collision detection
   ];
 
-  const anyPointInMap = trianglePoints.some(point => isPointInMap(point[0], point[1], map));
+  const anyPointInMap = trianglePoints.some(point => isPointInMap(point[0], point[1], map, videoWidth, videoHeight));
 
-  if (anyPointInStroke) {
+  if (anyPointInMap) {
     playNote();
   }
 
@@ -58,14 +58,13 @@ export function drawTriangle(ctx, y, x, r, color, map) {
   ctx.fill();
 }
 
-function isPointInMap(x, y, map) {
-  const resolution = 3;
-  const widthUnit = 640/resolution;
-  const heightUnit = 480/resolution;
+function isPointInMap(x, y, map, videoWidth, videoHeight) {
+  const widthUnit = videoWidth/map.length; // # rows
+  const heightUnit = videoHeight/map[0].length; // #columns
 
   const multX = Math.floor(x / widthUnit);
   const multY = Math.floor(y / heightUnit);
-  return map[multX][multY] === 1;
+  return map[multX][multY] === true;
 }
 
 /**
@@ -107,7 +106,7 @@ export function drawKeypoints(keypoints, minConfidence, ctx, scale = 1, map) {
     const {y, x} = keypoint.position;
 
     if (keypoint.part === 'nose') {
-      drawTriangle(ctx, y * scale, x * scale, 20, color, map);
+      drawTriangle(ctx, y * scale, x * scale, 20, color, map, 600, 500);
     }
 
   }

@@ -25,7 +25,7 @@ const videoWidth = 600;
 const videoHeight = 500;
 const stats = new Stats();
 const guiState = createDefaultGuiState();
-const map = generatePixelMap();
+const map = generatePixelMap(8, 8);
 
 /**
  * Loads a the camera to be used in the demo
