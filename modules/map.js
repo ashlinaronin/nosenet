@@ -115,6 +115,10 @@ function mapContainsPoint(map, mapPointCoords) {
   return map[mapXCoord][mapYCoord] === true;
 }
 
+export function mapIsEmpty(map) {
+  return !map.some(row => row.some(col => col === true));
+}
+
 export function drawTriangle(ctx, trianglePoints, color) {
   ctx.fillStyle = color;
   ctx.beginPath();

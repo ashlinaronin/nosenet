@@ -18,14 +18,15 @@ import * as posenet from '@tensorflow-models/posenet';
 import Stats from 'stats.js';
 import {createDefaultGuiState} from './modules/gui';
 import {drawMirroredVideo, drawSkeleton} from './modules/canvasUtils';
-import {drawPixelMap, generatePixelMap, calculateAndDrawMapPosition} from './modules/map';
+import {drawPixelMap, generatePixelMap, calculateAndDrawMapPosition, mapIsEmpty} from './modules/map';
 import {isMobile} from './modules/deviceDetection';
 
 const videoWidth = 600;
 const videoHeight = 500;
+const mapResolution = 8;
 const stats = new Stats();
 const guiState = createDefaultGuiState();
-const map = generatePixelMap(8, 8);
+let map = generatePixelMap(mapResolution, mapResolution);
 
 /**
  * Loads a the camera to be used in the demo
@@ -142,6 +143,10 @@ function detectPoseInRealTime(video) {
         }
       }
     });
+
+    if (mapIsEmpty(map)) {
+      map = generatePixelMap(mapResolution, mapResolution);
+    }
 
     // End monitoring code for frames per second
     stats.end();
