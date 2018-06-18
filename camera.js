@@ -16,9 +16,9 @@
  */
 import * as posenet from '@tensorflow-models/posenet';
 import Stats from 'stats.js';
-import {createDefaultGuiState, setupGui} from './modules/gui';
-import {drawKeypoints, drawMirroredVideo, drawSkeleton} from './modules/canvasUtils';
-import {drawPixelMaze, generatePixelMap} from './modules/map';
+import {createDefaultGuiState} from './modules/gui';
+import {drawMirroredVideo, drawSkeleton} from './modules/canvasUtils';
+import {drawPixelMap, generatePixelMap, calculateAndDrawMapPosition} from './modules/map';
 import {isMobile} from './modules/deviceDetection';
 
 const videoWidth = 600;
@@ -79,7 +79,7 @@ function setupFPS() {
  * Feeds an image to posenet to estimate poses - this is where the magic
  * happens. This function loops with a requestAnimationFrame method.
  */
-function detectPoseInRealTime(video, net) {
+function detectPoseInRealTime(video) {
   const canvas = document.getElementById('output');
   const ctx = canvas.getContext('2d');
   // since images are being fed from a webcam
@@ -127,7 +127,7 @@ function detectPoseInRealTime(video, net) {
       drawMirroredVideo(ctx, videoWidth, videoHeight);
     }
 
-    drawPixelMaze(ctx, videoWidth, videoHeight, 'orange', map);
+    drawPixelMap(ctx, videoWidth, videoHeight, 'orange', map);
 
     // For each pose (i.e. person) detected in an image, loop through the poses
     // and draw the resulting skeleton and keypoints if over certain confidence
@@ -135,7 +135,7 @@ function detectPoseInRealTime(video, net) {
     poses.forEach(({score, keypoints}) => {
       if (score >= minPoseConfidence) {
         if (guiState.output.showPoints) {
-          drawKeypoints(keypoints, minPartConfidence, ctx, 1, map);
+          calculateAndDrawMapPosition(keypoints, minPartConfidence, ctx, map, videoWidth, videoHeight);
         }
         if (guiState.output.showSkeleton) {
           drawSkeleton(keypoints, minPartConfidence, ctx);
@@ -177,7 +177,7 @@ export async function bindPage() {
   guiState.net = net;
 
   setupFPS();
-  detectPoseInRealTime(video, net);
+  detectPoseInRealTime(video);
 }
 
 navigator.getUserMedia = navigator.getUserMedia ||
