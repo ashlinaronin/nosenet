@@ -74,7 +74,7 @@ async function loadVideo() {
  */
 function setupFPS() {
   stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
-  document.body.appendChild(stats.dom);
+  // document.body.appendChild(stats.dom);
 }
 
 /**
@@ -125,20 +125,24 @@ function detectPoseInRealTime(video) {
 
     ctx.clearRect(0, 0, videoWidth, videoHeight);
 
+    ctx.globalCompositeOperation = 'source-over';
+
+    drawPixelMap(ctx, videoWidth, videoHeight, 'black', map);
+
+    ctx.globalCompositeOperation = 'source-atop';
+
     if (guiState.output.showVideo) {
-      drawMirroredVideo(ctx, videoWidth, videoHeight);
+      drawMirroredVideo(ctx, videoWidth, videoHeight, map);
     }
 
-    drawPixelMap(ctx, videoWidth, videoHeight, 'orange', map);
+    ctx.globalCompositeOperation = 'source-over';
 
-    // For each pose (i.e. person) detected in an image, loop through the poses
-    // and draw the resulting skeleton and keypoints if over certain confidence
-    // scores
+    const mapEmpty = mapIsEmpty(map);
 
-    const empty = mapIsEmpty(map);
-
-    if (!empty) {
-
+    if (!mapEmpty) {
+      // For each pose (i.e. person) detected in an image, loop through the poses
+      // and draw the resulting skeleton and keypoints if over certain confidence
+      // scores
       poses.forEach(({score, keypoints}) => {
         if (score >= minPoseConfidence) {
           if (guiState.output.showPoints) {
@@ -153,7 +157,7 @@ function detectPoseInRealTime(video) {
     }
 
     // If map is empty, pause for 48 frames then generate a new map
-    if (empty) {
+    if (mapEmpty) {
       waitingForNewMapFrames++;
 
       if (waitingForNewMapFrames > 48) {
