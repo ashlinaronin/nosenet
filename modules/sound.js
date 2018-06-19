@@ -1,26 +1,26 @@
 import Tone from 'tone';
 
-const noiseTypes = ['white', 'brown', 'pink'];
 const fmSynth = new Tone.FMSynth({
-  "modulationIndex" : 12.22,
+  "modulationIndex" : 14.22,
   "envelope" : {
     "attack" : 0.01,
     "decay" : 0.2
   },
   "modulation" : {
-    "type" : "square"
+    "type" : "sine"
   },
   "modulationEnvelope" : {
-    "attack" : 0.2,
-    "decay" : 0.01
+    "attack" : 0.3,
+    "decay" : 0.05
   }
 }).toMaster();
 
 export function playNote(x, y, width, height) {
   const volume = range(y, 0, height, 1.0, 0.0);
-  const type = noiseTypes[Math.floor(range(x, 0, width, 0, 2))];
-  const note = range(x, 0, width, 220, 440);
+  const note = range(x, 0, width, 110, 660);
+  const harmonicity = range(y, 0, height, 0.0, 2.0);
 
+  fmSynth.harmonicity.value = harmonicity;
   fmSynth.triggerAttackRelease(note, '32n', Tone.now(), volume);
 }
 
