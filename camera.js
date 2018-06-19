@@ -21,8 +21,8 @@ import {drawMirroredVideo, drawSkeleton} from './modules/canvasUtils';
 import {drawPixelMap, generatePixelMap, calculateAndDrawMapPosition, mapIsEmpty} from './modules/map';
 import {isMobile} from './modules/deviceDetection';
 
-const VIDEO_WIDTH = 600;
-const VIDEO_HEIGHT = 500;
+const VIDEO_WIDTH = 640;
+const VIDEO_HEIGHT = 480;
 const MAP_RESOLUTION = 8;
 let waitingForNewMapFrames = 0;
 const FRAMES_TO_WAIT_BETWEEN_MAPS = 24;
@@ -45,7 +45,7 @@ async function setupCamera() {
   video.height = VIDEO_HEIGHT;
 
   const mobile = isMobile();
-  const stream = await navigator.mediaDevices.getUserMedia({
+  video.srcObject = await navigator.mediaDevices.getUserMedia({
     'audio': false,
     'video': {
       facingMode: 'user',
@@ -53,7 +53,6 @@ async function setupCamera() {
       height: mobile ? undefined : VIDEO_HEIGHT,
     },
   });
-  video.srcObject = stream;
 
   return new Promise((resolve) => {
     video.onloadedmetadata = () => {
@@ -187,7 +186,7 @@ export async function bindPage() {
   const net = await posenet.load(+guiState.input.mobileNetArchitecture);
 
   document.getElementById('loading').style.display = 'none';
-  document.getElementById('main').style.display = 'block';
+  document.getElementById('main').style.display = 'flex';
 
   let video;
 
