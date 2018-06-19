@@ -43,7 +43,7 @@ export function calculateAndDrawMapPosition(keypoints, minConfidence, ctx, map, 
     if (keypoint.part === 'nose') {
       const trianglePoints = generateTrianglePoints(x, y, 20);
       checkForInMap(trianglePoints, map, videoWidth, videoHeight);
-      drawTriangle(ctx, trianglePoints, color);
+      drawTriangle(ctx, trianglePoints, 'black');
 
       if (typeof lastPosition === 'undefined') {
         lastPosition = [x, y];
