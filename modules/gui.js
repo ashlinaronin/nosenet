@@ -2,7 +2,7 @@ import dat from 'dat.gui';
 
 export function createDefaultGuiState() {
   return {
-    algorithm: 'single-pose',
+    algorithm: 'multi-pose',
     input: {
       mobileNetArchitecture: '0.50',
       outputStride: 16,

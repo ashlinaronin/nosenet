@@ -42,9 +42,7 @@ export function calculateAndDrawMapPosition(keypoints, minConfidence, ctx, map, 
 
     if (keypoint.part === 'nose') {
       const trianglePoints = generateTrianglePoints(x, y, 20);
-      const isInMap = checkForInMap(trianglePoints, map, videoWidth, videoHeight);
-      const color = isInMap ? 'blue' : 'yellow';
-
+      checkForInMap(trianglePoints, map, videoWidth, videoHeight);
       drawTriangle(ctx, trianglePoints, color);
 
       if (typeof lastPosition === 'undefined') {

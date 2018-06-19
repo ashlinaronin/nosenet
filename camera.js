@@ -21,13 +21,14 @@ import {drawMirroredVideo, drawSkeleton} from './modules/canvasUtils';
 import {drawPixelMap, generatePixelMap, calculateAndDrawMapPosition, mapIsEmpty} from './modules/map';
 import {isMobile} from './modules/deviceDetection';
 
-const videoWidth = 600;
-const videoHeight = 500;
-const mapResolution = 8;
+const VIDEO_WIDTH = 600;
+const VIDEO_HEIGHT = 500;
+const MAP_RESOLUTION = 8;
 let waitingForNewMapFrames = 0;
+const FRAMES_TO_WAIT_BETWEEN_MAPS = 24;
 const stats = new Stats();
 const guiState = createDefaultGuiState();
-let map = generatePixelMap(mapResolution, mapResolution);
+let map = generatePixelMap(MAP_RESOLUTION, MAP_RESOLUTION);
 
 /**
  * Loads a the camera to be used in the demo
@@ -40,16 +41,16 @@ async function setupCamera() {
   }
 
   const video = document.getElementById('video');
-  video.width = videoWidth;
-  video.height = videoHeight;
+  video.width = VIDEO_WIDTH;
+  video.height = VIDEO_HEIGHT;
 
   const mobile = isMobile();
   const stream = await navigator.mediaDevices.getUserMedia({
     'audio': false,
     'video': {
       facingMode: 'user',
-      width: mobile ? undefined : videoWidth,
-      height: mobile ? undefined : videoHeight,
+      width: mobile ? undefined : VIDEO_WIDTH,
+      height: mobile ? undefined : VIDEO_HEIGHT,
     },
   });
   video.srcObject = stream;
@@ -84,87 +85,19 @@ function setupFPS() {
 function detectPoseInRealTime(video) {
   const canvas = document.getElementById('output');
   const ctx = canvas.getContext('2d');
-  // since images are being fed from a webcam
-  const flipHorizontal = true;
 
-  canvas.width = videoWidth;
-  canvas.height = videoHeight;
+  canvas.width = VIDEO_WIDTH;
+  canvas.height = VIDEO_HEIGHT;
 
   async function poseDetectionFrame() {
     // Begin monitoring code for frames per second
     stats.begin();
 
-    // Scale an image down to a certain factor. Too large of an image will slow
-    // down the GPU
-    const imageScaleFactor = guiState.input.imageScaleFactor;
-    const outputStride = +guiState.input.outputStride;
+    const poses = await detectPoses();
 
-    let poses = [];
-    let minPoseConfidence;
-    let minPartConfidence;
-    switch (guiState.algorithm) {
-      case 'single-pose':
-        const pose = await guiState.net.estimateSinglePose(
-            video, imageScaleFactor, flipHorizontal, outputStride);
-        poses.push(pose);
-
-        minPoseConfidence = +guiState.singlePoseDetection.minPoseConfidence;
-        minPartConfidence = +guiState.singlePoseDetection.minPartConfidence;
-        break;
-      case 'multi-pose':
-        poses = await guiState.net.estimateMultiplePoses(
-            video, imageScaleFactor, flipHorizontal, outputStride,
-            guiState.multiPoseDetection.maxPoseDetections,
-            guiState.multiPoseDetection.minPartConfidence,
-            guiState.multiPoseDetection.nmsRadius);
-
-        minPoseConfidence = +guiState.multiPoseDetection.minPoseConfidence;
-        minPartConfidence = +guiState.multiPoseDetection.minPartConfidence;
-        break;
-    }
-
-    ctx.clearRect(0, 0, videoWidth, videoHeight);
-
-    ctx.globalCompositeOperation = 'source-over';
-
-    drawPixelMap(ctx, videoWidth, videoHeight, 'black', map);
-
-    ctx.globalCompositeOperation = 'source-atop';
-
-    if (guiState.output.showVideo) {
-      drawMirroredVideo(ctx, videoWidth, videoHeight, map);
-    }
-
-    ctx.globalCompositeOperation = 'source-over';
-
-    const mapEmpty = mapIsEmpty(map);
-
-    if (!mapEmpty) {
-      // For each pose (i.e. person) detected in an image, loop through the poses
-      // and draw the resulting skeleton and keypoints if over certain confidence
-      // scores
-      poses.forEach(({score, keypoints}) => {
-        if (score >= minPoseConfidence) {
-          if (guiState.output.showPoints) {
-            calculateAndDrawMapPosition(keypoints, minPartConfidence, ctx, map, videoWidth, videoHeight);
-          }
-          if (guiState.output.showSkeleton) {
-            drawSkeleton(keypoints, minPartConfidence, ctx);
-          }
-        }
-      });
-
-    }
-
-    // If map is empty, pause for 48 frames then generate a new map
-    if (mapEmpty) {
-      waitingForNewMapFrames++;
-
-      if (waitingForNewMapFrames > 48) {
-        map = generatePixelMap(mapResolution, mapResolution);
-        waitingForNewMapFrames = 0;
-      }
-    }
+    drawMapAndVideo(ctx);
+    drawPoses(ctx, poses);
+    checkAndRegenerateMap();
 
     // End monitoring code for frames per second
     stats.end();
@@ -173,6 +106,77 @@ function detectPoseInRealTime(video) {
   }
 
   poseDetectionFrame();
+}
+
+async function detectPoses() {
+  // Scale an image down to a certain factor. Too large of an image will slow
+  // down the GPU
+  const FLIP_HORIZONTAL = true;
+  const imageScaleFactor = guiState.input.imageScaleFactor;
+  const outputStride = +guiState.input.outputStride;
+
+  return guiState.net.estimateMultiplePoses(
+    video,
+    imageScaleFactor,
+    FLIP_HORIZONTAL,
+    outputStride,
+    guiState.multiPoseDetection.maxPoseDetections,
+    guiState.multiPoseDetection.minPartConfidence,
+    guiState.multiPoseDetection.nmsRadius
+  );
+}
+
+function drawPoses(ctx, poses) {
+  // For each pose (i.e. person) detected in an image, loop through the poses
+  // and draw the resulting skeleton and keypoints if over certain confidence
+  // scores
+  const minPoseConfidence = +guiState.multiPoseDetection.minPoseConfidence;
+  const minPartConfidence = +guiState.multiPoseDetection.minPartConfidence;
+
+  poses.forEach(({score, keypoints}) => {
+    if (score >= minPoseConfidence) {
+      if (guiState.output.showPoints) {
+        calculateAndDrawMapPosition(
+          keypoints,
+          minPartConfidence,
+          ctx,
+          map,
+          VIDEO_WIDTH,
+          VIDEO_HEIGHT
+        );
+      }
+      if (guiState.output.showSkeleton) {
+        drawSkeleton(keypoints, minPartConfidence, ctx);
+      }
+    }
+  });
+}
+
+function drawMapAndVideo(ctx) {
+  ctx.clearRect(0, 0, VIDEO_WIDTH, VIDEO_HEIGHT);
+  ctx.globalCompositeOperation = 'source-over';
+
+  drawPixelMap(ctx, VIDEO_WIDTH, VIDEO_HEIGHT, 'black', map);
+
+  ctx.globalCompositeOperation = 'source-atop';
+
+  if (guiState.output.showVideo) {
+    drawMirroredVideo(ctx, VIDEO_WIDTH, VIDEO_HEIGHT, map);
+  }
+
+  ctx.globalCompositeOperation = 'source-over';
+}
+
+function checkAndRegenerateMap() {
+  // If map is empty, pause for 48 frames then generate a new map
+  if (mapIsEmpty(map)) {
+    waitingForNewMapFrames++;
+
+    if (waitingForNewMapFrames > FRAMES_TO_WAIT_BETWEEN_MAPS) {
+      map = generatePixelMap(MAP_RESOLUTION, MAP_RESOLUTION);
+      waitingForNewMapFrames = 0;
+    }
+  }
 }
 
 /**
