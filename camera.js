@@ -186,7 +186,6 @@ export async function bindPage() {
   const net = await posenet.load(+guiState.input.mobileNetArchitecture);
 
   document.getElementById('loading').style.display = 'none';
-  document.getElementById('main').style.display = 'flex';
 
   let video;
 
