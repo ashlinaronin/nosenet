@@ -17,7 +17,7 @@ const fmSynth = new Tone.FMSynth({
 
 export function playNote(x, y, width, height) {
   const volume = range(y, 0, height, 1.0, 0.0);
-  const note = range(x, 0, width, 110, 660);
+  const note = range(x, 0, width, 80, 660);
   const harmonicity = range(y, 0, height, 0.0, 2.0);
 
   fmSynth.harmonicity.value = harmonicity;
