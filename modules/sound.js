@@ -1,21 +1,29 @@
 import Tone from 'tone';
 
-const synth = new Tone.Synth({
-  oscillator: {
-    type: 'amtriangle',
-    harmonicity: 0.5,
-    modulationType: 'sine'
+const noiseTypes = ['white', 'brown', 'pink'];
+const fmSynth = new Tone.FMSynth({
+  "modulationIndex" : 12.22,
+  "envelope" : {
+    "attack" : 0.01,
+    "decay" : 0.2
   },
-  envelope: {
-    attackCurve: 'exponential',
-    attack: 0.05,
-    decay: 0.2,
-    sustain: 0.2,
-    release: 1.5
+  "modulation" : {
+    "type" : "square"
   },
-  portamento: 0.05
+  "modulationEnvelope" : {
+    "attack" : 0.2,
+    "decay" : 0.01
+  }
 }).toMaster();
 
-export function playNote() {
-  synth.triggerAttackRelease('C4', '8n');
+export function playNote(x, y, width, height) {
+  const volume = range(y, 0, height, 1.0, 0.0);
+  const type = noiseTypes[Math.floor(range(x, 0, width, 0, 2))];
+  const note = range(x, 0, width, 220, 440);
+
+  fmSynth.triggerAttackRelease(note, '32n', Tone.now(), volume);
+}
+
+function range(num, in_min, in_max, out_min, out_max) {
+  return (num - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }

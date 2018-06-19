@@ -1,5 +1,8 @@
 import {playNote} from './sound';
 
+let lastPosition;
+const MIN_DISTANCE_TO_PLAY = 10;
+
 export function generatePixelMap(width, height) {
   const map = [];
 
@@ -14,8 +17,8 @@ export function generatePixelMap(width, height) {
 }
 
 export function drawPixelMap(ctx, videoWidth, videoHeight, color, map) {
- const widthUnit = videoWidth / map.length; // # rows
- const heightUnit = videoHeight / map[0].length; // # cols
+ const widthUnit = videoWidth / getMapWidth(map);
+ const heightUnit = videoHeight / getMapHeight(map);
 
  ctx.fillStyle = color;
  for (let i = 0; i < map.length; i++) {
@@ -42,11 +45,18 @@ export function calculateAndDrawMapPosition(keypoints, minConfidence, ctx, map, 
       const isInMap = checkForInMap(trianglePoints, map, videoWidth, videoHeight);
       const color = isInMap ? 'blue' : 'yellow';
 
-      if (isInMap) {
-        playNote();
+      drawTriangle(ctx, trianglePoints, color);
+
+      if (typeof lastPosition === 'undefined') {
+        lastPosition = [x, y];
       }
 
-      drawTriangle(ctx, trianglePoints, color);
+      if (
+        Math.abs(lastPosition[0] - x) > MIN_DISTANCE_TO_PLAY ||
+        Math.abs(lastPosition[1] - y) > MIN_DISTANCE_TO_PLAY) {
+        playNote(x, y, videoWidth, videoHeight);
+        lastPosition = [x, y];
+      }
     }
   }
 }
@@ -71,6 +81,7 @@ function checkForInMap(trianglePoints, map, videoWidth, videoHeight) {
 
     if (containsPoint) {
       anyTrianglePointInMap = true;
+      // playNote(mapCoordinates[0], mapCoordinates[1], getMapWidth(map), getMapHeight(map));
       removePointFromMap(map, mapCoordinates);
     }
   });
@@ -83,20 +94,32 @@ function removePointFromMap(map, mapPointCoords) {
   map[mapXCoord][mapYCoord] = false;
 }
 
+function getMapWidth(map) {
+  return map.length;
+}
+
+function getMapHeight(map) {
+  return map[0].length;
+}
+
 function getMapCoordinatesForPoint(x, y, map, videoWidth, videoHeight) {
-  const widthUnit = videoWidth / map.length; // # rows
-  const heightUnit = videoHeight / map[0].length; // # cols
+  const mapWidth = getMapWidth(map);
+  const mapHeight = getMapHeight(map);
+
+  const widthUnit = videoWidth / mapWidth; // # rows
+  const heightUnit = videoHeight / mapHeight; // # cols
+
 
   let mapXCoord = Math.floor(x / widthUnit);
   let mapYCoord = Math.floor(y / heightUnit);
 
   // Account for edges of camera window
-  if (mapXCoord >= map.length) {
-    mapXCoord = map.length - 1;
+  if (mapXCoord >= mapWidth) {
+    mapXCoord = mapWidth - 1;
   }
 
-  if (mapYCoord >= map[0].length) {
-    mapYCoord = map[0].length - 1;
+  if (mapYCoord >= mapHeight) {
+    mapYCoord = mapHeight - 1;
   }
 
   if (mapXCoord <= 0) {
