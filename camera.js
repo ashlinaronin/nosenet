@@ -24,6 +24,7 @@ import {isMobile} from './modules/deviceDetection';
 const videoWidth = 600;
 const videoHeight = 500;
 const mapResolution = 8;
+let waitingForNewMapFrames = 0;
 const stats = new Stats();
 const guiState = createDefaultGuiState();
 let map = generatePixelMap(mapResolution, mapResolution);
@@ -133,19 +134,32 @@ function detectPoseInRealTime(video) {
     // For each pose (i.e. person) detected in an image, loop through the poses
     // and draw the resulting skeleton and keypoints if over certain confidence
     // scores
-    poses.forEach(({score, keypoints}) => {
-      if (score >= minPoseConfidence) {
-        if (guiState.output.showPoints) {
-          calculateAndDrawMapPosition(keypoints, minPartConfidence, ctx, map, videoWidth, videoHeight);
-        }
-        if (guiState.output.showSkeleton) {
-          drawSkeleton(keypoints, minPartConfidence, ctx);
-        }
-      }
-    });
 
-    if (mapIsEmpty(map)) {
-      map = generatePixelMap(mapResolution, mapResolution);
+    const empty = mapIsEmpty(map);
+
+    if (!empty) {
+
+      poses.forEach(({score, keypoints}) => {
+        if (score >= minPoseConfidence) {
+          if (guiState.output.showPoints) {
+            calculateAndDrawMapPosition(keypoints, minPartConfidence, ctx, map, videoWidth, videoHeight);
+          }
+          if (guiState.output.showSkeleton) {
+            drawSkeleton(keypoints, minPartConfidence, ctx);
+          }
+        }
+      });
+
+    }
+
+    // If map is empty, pause for 48 frames then generate a new map
+    if (empty) {
+      waitingForNewMapFrames++;
+
+      if (waitingForNewMapFrames > 48) {
+        map = generatePixelMap(mapResolution, mapResolution);
+        waitingForNewMapFrames = 0;
+      }
     }
 
     // End monitoring code for frames per second
