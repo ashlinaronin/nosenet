@@ -24,6 +24,7 @@ import {isMobile} from './modules/deviceDetection';
 const VIDEO_WIDTH = 640;
 const VIDEO_HEIGHT = 480;
 const MAP_RESOLUTION = 8;
+const EXTERNAL_WEBCAM_LABEL = 'USB Camera (046d:0821)'; // look for this webcam, if not found use default
 let waitingForNewMapFrames = 0;
 const FRAMES_TO_WAIT_BETWEEN_MAPS = 24;
 const stats = new Stats();
@@ -40,25 +41,33 @@ async function setupCamera() {
         'Browser API navigator.mediaDevices.getUserMedia not available');
   }
 
-  const video = document.getElementById('video');
-  video.width = VIDEO_WIDTH;
-  video.height = VIDEO_HEIGHT;
-
+  const devices = await navigator.mediaDevices.enumerateDevices();
+  const usbWebcamDevice = devices.find(d => d.kind === 'videoinput' && d.label === EXTERNAL_WEBCAM_LABEL);
   const mobile = isMobile();
-  video.srcObject = await navigator.mediaDevices.getUserMedia({
-    'audio': false,
-    'video': {
-      facingMode: 'user',
+  const video = document.getElementById('video');
+  const constraints = {
+    audio: false,
+    video: {
       width: mobile ? undefined : VIDEO_WIDTH,
       height: mobile ? undefined : VIDEO_HEIGHT,
-    },
-  });
+      deviceId: usbWebcamDevice ? usbWebcamDevice.deviceId : undefined
+    }
+  };
+
+
+  video.width = VIDEO_WIDTH;
+  video.height = VIDEO_HEIGHT;
+  video.srcObject = await navigator.mediaDevices.getUserMedia(constraints);
 
   return new Promise((resolve) => {
     video.onloadedmetadata = () => {
       resolve(video);
     };
   });
+}
+
+async function getDevice() {
+
 }
 
 async function loadVideo() {
