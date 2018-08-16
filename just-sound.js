@@ -1,3 +1,3 @@
-import { playTestNote } from './modules/newSynth';
+import { playTestPattern } from './modules/newSynth';
 
-playTestNote();
+playTestPattern();
