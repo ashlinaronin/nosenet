@@ -1,35 +1,22 @@
 import Tone from 'tone';
+import mapRange from './mapRange';
 
-const metalSynth = new Tone.MetalSynth({
-  frequency: 80,
-  envelope:
-    {
-      attack: 0.001,
-      decay:
-        12.4,
-      release:
-        0.9
-    }
-  ,
-  harmonicity: 2.1,
-  modulationIndex:
-    18,
-  resonance:
-    2000,
-  octaves:
-    3.5
-}).toMaster();
-
+const synth = new Tone.DuoSynth().toMaster();
 
 export function startNote() {
-  metalSynth.triggerAttack('+0.05', 0.8);
+  synth.triggerAttack(synth.frequency.value, '+0.05', 0.8);
 }
 
 export function endNote() {
-  metalSynth.triggerRelease('+0.05');
+  synth.triggerRelease('+0.05');
 }
 
-export function changeParam(x, y) {
-  metalSynth.harmonicity = x;
-  metalSynth.modulationIndex = y;
+export function changeParam(x, y, width, height) {
+  const frequency = mapRange(x, 0, width, 80, 660);
+  const harmonicity = mapRange(y, 0, height, 0.0, 2.0);
+  const volume = mapRange(y, 0, height, 1.0, 0.0);
+
+  synth.frequency.value = frequency;
+  synth.harmonicity.value = harmonicity;
+  synth.volume.value = volume;
 }

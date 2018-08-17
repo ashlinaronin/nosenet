@@ -1,7 +1,8 @@
-import {playNote} from './sound';
+import { startNote, endNote, changeParam } from './newSynth';
 
 let lastPosition;
-const MIN_DISTANCE_TO_PLAY = 10;
+let isPlaying = false;
+const MIN_DISTANCE_TO_PLAY = 16;
 
 export function generatePixelMap(width, height) {
   const map = [];
@@ -38,6 +39,8 @@ export function calculateAndDrawMapPosition(keypoints, minConfidence, ctx, map, 
       continue;
     }
 
+    console.log(isPlaying);
+
     const {y, x} = keypoint.position;
 
     if (keypoint.part === 'nose') {
@@ -49,10 +52,21 @@ export function calculateAndDrawMapPosition(keypoints, minConfidence, ctx, map, 
         lastPosition = [x, y];
       }
 
+      changeParam(x, y, videoWidth, videoHeight);
+
       if (
         Math.abs(lastPosition[0] - x) > MIN_DISTANCE_TO_PLAY ||
         Math.abs(lastPosition[1] - y) > MIN_DISTANCE_TO_PLAY) {
-        playNote(x, y, videoWidth, videoHeight);
+
+        if (!isPlaying) {
+          startNote();
+          isPlaying = true;
+          setTimeout(() => {
+            isPlaying = false;
+            endNote();
+          }, 900);
+        }
+
         lastPosition = [x, y];
       }
     }
@@ -79,7 +93,6 @@ function checkForInMap(trianglePoints, map, videoWidth, videoHeight) {
 
     if (containsPoint) {
       anyTrianglePointInMap = true;
-      // playNote(mapCoordinates[0], mapCoordinates[1], getMapWidth(map), getMapHeight(map));
       removePointFromMap(map, mapCoordinates);
     }
   });
