@@ -6,7 +6,7 @@ const metalSynth = new Tone.MetalSynth({
     {
       attack: 0.001,
       decay:
-        1.4,
+        12.4,
       release:
         0.9
     }
@@ -15,30 +15,20 @@ const metalSynth = new Tone.MetalSynth({
   modulationIndex:
     18,
   resonance:
-    150,
+    2000,
   octaves:
     3.5
 }).toMaster();
 
-const harmonicityPattern = new Tone.Pattern((time, harmonicity) => {
-  metalSynth.harmonicity = harmonicity;
-  metalSynth.triggerAttackRelease(0.25, time, 0.8);
-}, [1, 2, 3, 4]);
 
-export function playTestNote() {
-  metalSynth.triggerAttackRelease(80, '32n', Tone.now(), 0.8);
+export function startNote() {
+  metalSynth.triggerAttack(Tone.now(), 0.8);
 }
 
-export function playTestPattern() {
-  Tone.Transport.cancel();
-  harmonicityPattern.start();
-  Tone.Transport.start();
+export function endNote() {
+  metalSynth.triggerRelease(Tone.now());
 }
 
-export function stopSound() {
-  Tone.Transport.stop();
-}
-
-export function playSound() {
-  Tone.Transport.start();
+export function changeParam(event) {
+  metalSynth.harmonicity = Number(event.target.value);
 }

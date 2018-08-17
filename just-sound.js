@@ -1,6 +1,5 @@
-import { playTestPattern, stopSound, playSound } from './modules/newSynth';
+import { startNote, endNote, changeParam } from './modules/newSynth';
 
-document.getElementById('stop-sound').addEventListener('click', stopSound);
-document.getElementById('play-sound').addEventListener('click', playSound);
-
-playTestPattern();
+document.getElementById('control--start').addEventListener('click', startNote);
+document.getElementById('control--end').addEventListener('click', endNote);
+document.getElementById('control--param').addEventListener('input', changeParam);
