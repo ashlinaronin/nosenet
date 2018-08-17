@@ -22,13 +22,14 @@ const metalSynth = new Tone.MetalSynth({
 
 
 export function startNote() {
-  metalSynth.triggerAttack(Tone.now(), 0.8);
+  metalSynth.triggerAttack('+0.05', 0.8);
 }
 
 export function endNote() {
-  metalSynth.triggerRelease(Tone.now());
+  metalSynth.triggerRelease('+0.05');
 }
 
-export function changeParam(event) {
-  metalSynth.harmonicity = Number(event.target.value);
+export function changeParam(x, y) {
+  metalSynth.harmonicity = x;
+  metalSynth.modulationIndex = y;
 }
