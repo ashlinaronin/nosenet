@@ -1,13 +1,33 @@
 import Tone from 'tone';
 import mapRange from './mapRange';
 
-const synth = new Tone.DuoSynth().toMaster();
+const synth = new Tone.DuoSynth({
+  voice0: {
+    envelope: {
+      attack: 0.01,
+      decay: 0.2,
+      sustain: 1.0,
+      release: 0.8
+    }
+  },
+  voice1: {
+    envelope: {
+      attack: 0.01,
+      decay: 0.2,
+      sustain: 1.0,
+      release: 0.8
+    }
+  }
+}).toMaster();
 
 export function startNote() {
+  console.log('startNote');
   synth.triggerAttack(synth.frequency.value, '+0.05', 0.8);
 }
 
 export function endNote() {
+  console.log('endNote');
+  // synth.triggerRelease();
   synth.triggerRelease('+0.05');
 }
 
