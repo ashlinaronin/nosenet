@@ -21,13 +21,10 @@ const synth = new Tone.DuoSynth({
 }).toMaster();
 
 export function startNote() {
-  console.log('startNote');
   synth.triggerAttack(synth.frequency.value, '+0.05', 0.8);
 }
 
 export function endNote() {
-  console.log('endNote');
-  // synth.triggerRelease();
   synth.triggerRelease('+0.05');
 }
 
