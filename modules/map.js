@@ -2,6 +2,7 @@ import { startNote, endNote, changeParam } from './newSynth';
 
 let lastPosition;
 let isPlaying = false;
+let framesSinceLastMovement = 0;
 const MIN_DISTANCE_TO_PLAY = 16;
 
 export function generatePixelMap(width, height) {
@@ -39,8 +40,6 @@ export function calculateAndDrawMapPosition(keypoints, minConfidence, ctx, map, 
       continue;
     }
 
-    console.log(isPlaying);
-
     const {y, x} = keypoint.position;
 
     if (keypoint.part === 'nose') {
@@ -53,21 +52,27 @@ export function calculateAndDrawMapPosition(keypoints, minConfidence, ctx, map, 
       }
 
       changeParam(x, y, videoWidth, videoHeight);
+      framesSinceLastMovement = framesSinceLastMovement + 1;
 
       if (
         Math.abs(lastPosition[0] - x) > MIN_DISTANCE_TO_PLAY ||
         Math.abs(lastPosition[1] - y) > MIN_DISTANCE_TO_PLAY) {
 
+        framesSinceLastMovement = 0;
+
         if (!isPlaying) {
           startNote();
           isPlaying = true;
-          setTimeout(() => {
-            isPlaying = false;
-            endNote();
-          }, 900);
         }
 
         lastPosition = [x, y];
+      }
+
+      if (framesSinceLastMovement > 5) {
+        if (isPlaying) {
+          endNote();
+          isPlaying = false;
+        }
       }
     }
   }
