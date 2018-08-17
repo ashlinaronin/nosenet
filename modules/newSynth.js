@@ -1,6 +1,8 @@
 import Tone from 'tone';
 import mapRange from './mapRange';
 
+// create modules
+const reverb = new Tone.Reverb(1.5);
 const synth = new Tone.DuoSynth({
   voice0: {
     envelope: {
@@ -18,7 +20,14 @@ const synth = new Tone.DuoSynth({
       release: 0.8
     }
   }
-}).toMaster();
+});
+
+// generate impulse response for verb, then connect modules
+reverb.generate().then(() => {
+  synth.connect(reverb);
+  reverb.connect(Tone.Master);
+});
+
 
 export function startNote() {
   synth.triggerAttack(synth.frequency.value, '+0.05', 0.8);
