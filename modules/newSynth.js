@@ -3,7 +3,7 @@ import mapRange from './mapRange';
 
 // create modules
 const reverb = new Tone.Reverb(1.5);
-const osc = new Tone.FatOscillator(440, 'sawtooth');
+const osc = new Tone.PulseOscillator(80, 0.2);
 const env = new Tone.AmplitudeEnvelope();
 
 // generate impulse response for verb, then connect modules
@@ -24,13 +24,7 @@ export function endNote() {
 }
 
 export function changeParam(x, y, width, height) {
-  const frequency = mapRange(x, 0, width, 80, 660);
-  const detune = mapRange(y, 0, height, -100.0, 100.0);
-  const spread = mapRange(y, 0, height, 0, 40);
-  const phase = mapRange(x, 0, width, 0, 90.0);
-
-  osc.frequency.value = frequency;
-  osc.phase = phase;
-  osc.detune.value = detune;
-  osc.spread = spread;
+  osc.phase = mapRange(x, 0, width, 0, 90.0);
+  osc.detune.value = mapRange(y, 0, height, -100.0, 100.0);
+  osc.width.value = mapRange(y, 0, height, 0, 1.0);
 }
