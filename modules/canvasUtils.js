@@ -15,6 +15,8 @@
  * =============================================================================
  */
 
+/** significantly modified by ashlin aronin **/
+
 export function drawMirroredVideo(ctx, videoWidth, videoHeight) {
   ctx.save();
   ctx.scale(-1, 1);

@@ -14,6 +14,10 @@
  * limitations under the License.
  * =============================================================================
  */
+
+/** significantly modified by ashlin aronin **/
+
+
 import * as posenet from '@tensorflow-models/posenet';
 import Stats from 'stats.js';
 import {createDefaultGuiState} from './modules/gui';
